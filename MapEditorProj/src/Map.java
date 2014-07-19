@@ -1,60 +1,137 @@
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Map {
-	int x, y;
-	static String mapName;
-	static ArrayList<ArrayList<Tile>> grid;
-	public Map(int x, int y){
-		this.x = x;
-		this.y = y;
-		grid = new ArrayList<ArrayList<Tile>>();
-		makeGrid(this.x, this.y);
+// we will actually put the grid on this
+public class Map extends Canvas {
+	public static final Color FOREGROUND_GRID_COLOR = Color.BLACK;
+	public static final Color BACKGROUND_GRID_COLOR = Color.WHITE;
+
+	private double scaleFactor = 2;
+
+	// stored as grid.get(x).get(y)[0] = tile
+	// grid.get(x).get(y)[1] = decor
+	private Grid grid;
+
+	public Map(String name, int w, int h) {
+		setName(name);
+		grid = new Grid(w, h);
 	}
-	
-	public void makeGrid(int x, int y){
-		int Yloc = 0;//bottom of menu bar
-		int Xloc = 0;
-		for(int yT = 0; yT < y; yT++){
-			grid.add(new ArrayList<Tile>());
-			for(int xT = 0; xT < x; xT++){
-				Tile t = new Tile(-1);
-				t.xLoc = xT;
-				t.yLoc = yT;
-				t.giveListener(true);
-				t.setBounds(Xloc, Yloc, Tile.size, Tile.size);
-				t.setVisible(true);
-				grid.get(yT).add(t);
-				Map_Edit.editSpace.add(grid.get(yT).get(xT));
-				Xloc += 25;
+
+	@Override
+	public void paint(Graphics g) {
+		drawTiles(g);
+	}
+
+	public void update(Graphics g) {
+		paint(g);
+	}
+
+	public ArrayList<ArrayList<WorldObj[]>> getGrid() {
+		return grid;
+	}
+
+	public void drawTiles(Graphics g) {
+		g.setColor(BACKGROUND_GRID_COLOR);
+		for (int x = 0; x < grid.size(); x++) {
+			for (int y = 0; y < grid.get(x).size(); y++) {
+				BufferedImage img = grid.get(x).get(y)[0].getImage();
+				g.drawImage(img, 0, 0,
+						(int) (x * Tile.TILE_SIZE * scaleFactor), (int) (y
+								* Tile.TILE_SIZE * scaleFactor),
+						img.getWidth(), img.getHeight(),
+						(int) (Tile.TILE_SIZE * scaleFactor),
+						(int) (Tile.TILE_SIZE * scaleFactor), null);
+				img = grid.get(x).get(y)[1].getImage();
+
+				g.drawImage(img, 0, 0,
+						(int) (x * Tile.TILE_SIZE * scaleFactor), (int) (y
+								* Tile.TILE_SIZE * scaleFactor),
+						img.getWidth(), img.getHeight(), img.getWidth(),
+						img.getHeight(), null);
+
 			}
-			Yloc += 25;
-			Xloc = 0;
 		}
 	}
-	
-	public static void sync(){
-		for(ArrayList<Tile> row : grid){
-			for(Tile t : row){
-				if(t.synchronizable){
-					
+
+	public void setSize(int w, int h) {
+		grid.resize(w, h);
+		repaint();
+	}
+
+	public int getWidth() {
+		return (int) grid.getSize().getWidth();
+	}
+
+	public int getHeight() {
+		return (int) grid.getSize().getHeight();
+
+	}
+
+	public Dimension getSize() {
+		return grid.getSize();
+	}
+
+	@Override
+	public String getName() {
+		return super.getName();
+	}
+
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+	}
+}
+
+class Grid extends ArrayList<ArrayList<WorldObj[]>> {
+	public Grid(int w, int h) {
+		resize(w, h);
+	}
+
+	public void resize(int w, int h) {
+		// don't need to check the y direction because the if x = 0, then there
+		// can be no y.
+		if (size() == 0 && w == 0 && h == 0) {
+			return;
+		}
+		for (int x = 0; x < Math.max(size(), w); x++) {
+			if (size() == 0 && w != 0) {
+				add(new ArrayList<WorldObj[]>());
+			}
+			for (int y = 0; y < Math.max(get(x).size(), w); y++) {
+				// cut off the last discard column
+				if (x > w) {
+					remove(w + 1);
+					continue;
+				}
+				// add a column if we can't access it yet
+				if (size() <= x) {
+					add(new ArrayList<WorldObj[]>());
+				}
+
+				// cut off the first discard row element
+				if (y > h) {
+					get(x).remove(h);
+				} else {
+					// add a new blank cell if needed
+					get(x).add(
+							y,
+							new WorldObj[] { new Tile(-1, 0),
+									new Decoration(-1) });
 				}
 			}
 		}
+		System.out.println("Horiz: " + size() + "  Vert: " + get(0).size());
 	}
-	
-	public void addCol(){
-		x += 1;
-		for(ArrayList<Tile> row: grid){
-			row.add(new Tile(-1));
+
+	public Dimension getSize() {
+		if (size() == 0) {
+			return new Dimension(size(), 0);
+		} else {
+			return new Dimension(size(), get(0).size());
 		}
-	}
-	
-	public void addRow(){
-		y += 1;
-		ArrayList<Tile> temp = new ArrayList<Tile>();
-		for(int i = 0; i < x; i++){
-			temp.add(new Tile(-1));
-		}
-		grid.add(temp);
 	}
 }

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
 public class TileLabel extends JPanel {
 	int lastX = 0;
 	int lastY = 70;
@@ -27,7 +26,7 @@ public class TileLabel extends JPanel {
 			lab = new JLabel("Tiles");
 			lab.setBounds(70, 30, 100, 37);
 			try{
-				getTiles();
+				//getTiles();
 			}catch(Exception e){
 				System.out.println("Some tiles failed to load!");
 			}
@@ -36,7 +35,7 @@ public class TileLabel extends JPanel {
 			lab = new JLabel("Decorations");
 			lab.setBounds(30, 30, 300, 37);
 			try{
-				getDecor();
+				//getDecor();
 			}catch(Exception e){
 				System.out.println("Some Decorations failed to load!");
 			}
@@ -47,7 +46,7 @@ public class TileLabel extends JPanel {
 	}
 	
 	
-	public void getTiles(){
+	/*public void getTiles(){
 		for(int i = 0; i < Controller.getNumObj(true) -1; i++){
 			tile = new Tile(i);
 			tile.giveListener(false);
@@ -98,8 +97,8 @@ public class TileLabel extends JPanel {
 			decor.add(decoration);
 			this.add(decor.get(i));
 		}
-	}
-	
+	}*/
+	/*
 	public static void blankBorders(){
 		
 		for(Tile t : TileLabel.tiles){
@@ -111,5 +110,5 @@ public class TileLabel extends JPanel {
 			d.selected = false;
 		}
 		
-	}
+	}*/
 }

@@ -1,12 +1,16 @@
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-public class Controller {//responsible for common used methods for interacting with stored files
+public class Controller {// responsible for common used methods for interacting
+							// with stored files
 	public static Controller controller = new Controller();
 
 	public static void createNewMap(String name, int xCols, int yCols) {
@@ -23,79 +27,63 @@ public class Controller {//responsible for common used methods for interacting w
 			}
 		}
 		if (!taken || (taken && overwrite)) {
-			try {
-				FileWriter write = new FileWriter("Maps/" + name, false);
-				PrintWriter out = new PrintWriter(write);
-				
-				for(int y = 0; y < yCols; y++){
-					for(int x = 0; x < xCols; x++){
-						out.print("-1 ");
-					}
-					out.println("!");
-				}
-				out.close();
-			} catch (IOException e) {
-				System.out.println("Couldn't make map file");
-			}
+
 		}
 	}
-	
-	public static void save(){
-		try{
-			FileWriter write = new FileWriter("Maps/" + Map.mapName, false);
-			PrintWriter out = new PrintWriter(write);
-			for(ArrayList<Tile> row : Map.grid){
-				for(Tile t : row){
-					out.print(t.toString());
+
+	public static void save(String name, Map map) {
+		try {
+			FileWriter write = new FileWriter("Maps/" + name, false);
+			BufferedWriter out = new BufferedWriter(write);
+			for (ArrayList<WorldObj[]> row : map.getGrid()) {
+				for (WorldObj[] t : row) {
+					out.append(t[0].toString() + " " + t[1].toString() + "   ");
 				}
-				out.println("!");
+				out.newLine();
 			}
 			out.close();
-		}catch(Exception e){
+		} catch (Exception e) {
 			System.out.println("Error, map couldn't be saved");
 		}
 	}
 
-	public static boolean checkFileExistance(String name) { // true: file exists
-		File dir;
-		String[] list;
+	public static void open(String name) {
+		BufferedReader read = null;
+		try {
+			Map map = new Map(name, 0, 0);
 
-		if (name.substring(name.length() - 4, name.length()).equalsIgnoreCase(".txt")) {
-			//maps saved as a .txt file
-
-
-			dir = new File("Maps");
-			list = dir.list();
-			for (String fileName : list) {//search in folder Maps
-				if (fileName.equals(name)) {
-					return true;
+			read = new BufferedReader(new FileReader(new File("Maps/" + name)));
+			int y = 0;
+			while (read.ready()) {
+				int x = 0;
+				for (String grid : read.readLine().split("   [ ]*")) {
+					String[] ids = grid.split(" ");
+					Tile tile = new Tile(Integer.parseInt(ids[0]),
+							Integer.parseInt(ids[1]));
+					Decoration decor = new Decoration(Integer.parseInt(ids[2]));
+					WorldObj obj[] = new WorldObj[] { tile, decor };
+					if (map.getGrid().size() <= x) {
+						map.getGrid().add(new ArrayList<WorldObj[]>());
+					}
+					// add cell
+					map.getGrid().get(x).add(y, obj);
 				}
 			}
-			return false;
-		} else {
-			// for tiles
-
-
-			dir = new File("World/Tiles");
-			list = dir.list();
-			for (String fileName : list) {
-				if (fileName.equals(name)) {
-					return true;
-				}
+		} catch (Exception e) {
+			System.out.println("Error, map couldn't be saved");
+		}
+		if (read != null) {
+			try {
+				read.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			return false;
 		}
 	}
-	
-	public static int getNumObj(boolean tile){
-		File dir = null;
-		String[] list;
-		if(tile){
-			dir = new File("World/Tiles");
-		}else{
-			dir = new File("World/Decorations");
-		}
-		list = dir.list();
-		return list.length -1;
+
+	public static boolean checkFileExistance(String name) { // true: file exists
+		return new File("/Maps/", name).exists()
+				|| new File("/World/Tiles/", name).exists()
+				|| new File("/World/Decorations/", name).exists();
 	}
 }
