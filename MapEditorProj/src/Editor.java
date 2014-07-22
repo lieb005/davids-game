@@ -64,14 +64,14 @@ public class Editor extends JApplet implements ActionListener {
 		ImageHandler.loadImages(true);
 
 		setLayout(new BorderLayout());
-		
+
 		// 950 / Tile.TILE_SIZE, 722 /Tile.TILE_SIZE
 		edit = new Map("New Map", 950 / Tile.TILE_SIZE, 722 / Tile.TILE_SIZE);
-		add(new JScrollPane((JPanel)edit), "Center");
+		add(new JScrollPane((JPanel) edit), "Center");
 		// edit.setBounds(0, 0, 950, 722);
 		// edit.setVisible(true);
 
-				JTabbedPane labelPanel = new JTabbedPane();
+		JTabbedPane labelPanel = new JTabbedPane();
 		labelPanel.setBackground(Color.black);
 		// labelPanel.setBounds(950, 0, 250, 700);
 		tiles = new TileLabel(true);
@@ -179,11 +179,11 @@ public class Editor extends JApplet implements ActionListener {
 		sizePanel.add(yLabel);
 		sizePanel.add(heightTextField);
 
-//		JPanel namePanel = new JPanel();
-//		JLabel nameLabel = new JLabel("Name:");
-//		final JTextField nameTextField = new JTextField(15);
-//		namePanel.add(nameLabel);
-//		namePanel.add(nameTextField);
+		// JPanel namePanel = new JPanel();
+		// JLabel nameLabel = new JLabel("Name:");
+		// final JTextField nameTextField = new JTextField(15);
+		// namePanel.add(nameLabel);
+		// namePanel.add(nameTextField);
 
 		JPanel buttonPanel = new JPanel();
 		JButton okButton = new JButton("Okay");
@@ -193,7 +193,7 @@ public class Editor extends JApplet implements ActionListener {
 
 		final JOptionPane options = new JOptionPane("Map:",
 				JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
-				new JPanel[] { sizePanel,  buttonPanel});
+				new JPanel[] { sizePanel, buttonPanel });
 		options.setWantsInput(true);
 
 		final JDialog d;
@@ -209,15 +209,26 @@ public class Editor extends JApplet implements ActionListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int w = Integer.parseInt(widthTextField.getText());
-				int h = Integer.parseInt(heightTextField.getText());
-				if (newMapBool || edit == null) {
-					edit = new Map((String)(options.getInputValue()), w, h);
-				} else {
-					edit.setGridSize(w, h);
+				boolean canWrite = true;
+				int w = 0;
+				int h = 0;
+				try {
+					w = Integer.parseInt(widthTextField.getText());
+					h = Integer.parseInt(heightTextField.getText());
+				} catch (Exception ex) {
+					canWrite = false;
+					JOptionPane.showMessageDialog(null,
+							"Only numbers can be used for a map dimension");
 				}
-				d.setVisible(false);
-				d.dispose();
+				if (canWrite) {
+					if (newMapBool || edit == null) {
+						edit = new Map((String) (options.getInputValue()), w, h);
+					} else {
+						edit.setGridSize(w, h);
+					}
+					d.setVisible(false);
+					d.dispose();
+				}
 			}
 		});
 		cancelButton.addActionListener(new ActionListener() {
