@@ -49,9 +49,9 @@ public class Editor extends JApplet implements ActionListener {
 		e.init();
 		e.start();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// window.setResizable(false);
+		//window.setResizable(false);
 		// window.setLayout(null);
-		window.setSize(new Dimension(1200, 722));
+		window.setSize(new Dimension(120, 722));
 		// window.pack();
 		window.setVisible(true);
 	}

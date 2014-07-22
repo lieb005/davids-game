@@ -94,6 +94,7 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 	public void resize(int w, int h) {
 		// don't need to check the y direction because the if x = 0, then there
 		// can be no y.
+		System.out.println("Wanted: (" + h + ", " + w + ")");
 		if (size() == 0 && w == 0 && h == 0) {
 			return;
 		}
@@ -101,30 +102,29 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 			if (size() == 0 && w != 0) {
 				add(new ArrayList<WorldObj[]>());
 			}
-			for (int y = 0; y < Math.max(get(x).size(), w); y++) {
-				// cut off the last discard column
-				if (x > w) {
-					remove(w + 1);
-					continue;
-				}
-				// add a column if we can't access it yet
-				if (size() <= x) {
-					add(new ArrayList<WorldObj[]>());
-				}
-
-				// cut off the first discard row element
-				if (y > h) {
-					get(x).remove(h);
-				} else {
-					// add a new blank cell if needed
+			if (size() >= x) {
+				add(new ArrayList<WorldObj[]>());
+			} else {
+				remove(x);
+				continue;
+			}
+			for (int y = 0; y < Math.max(get(x).size(), h); y++) {
+				if (size() >= x) {
 					get(x).add(
-							y,
 							new WorldObj[] { new Tile(-1, 0),
 									new Decoration(-1) });
+				} else {
+					remove(y);
+					continue;
 				}
 			}
 		}
-		System.out.println("Horiz: " + size() + "  Vert: " + get(0).size());
+		try {
+			System.out.println("Wanted: (" + h + ", " + w + ")    Got: ("
+					+ size() + ", " + get(0).size() + ")");
+		} catch (IndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Dimension getSize() {
