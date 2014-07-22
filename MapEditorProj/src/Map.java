@@ -1,12 +1,13 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import javax.swing.JPanel;
+
 // we will actually put the grid on this
-public class Map extends Canvas {
+public class Map extends JPanel {
 	public static final Color FOREGROUND_GRID_COLOR = Color.BLACK;
 	public static final Color GRID_GRID_COLOR = Color.RED;
 	public static final Color BACKGROUND_GRID_COLOR = Color.WHITE;
@@ -18,12 +19,14 @@ public class Map extends Canvas {
 	private Grid grid;
 
 	public Map(String name, int w, int h) {
+		super(true);
+		setSize(w * Tile.TILE_SIZE, h * Tile.TILE_SIZE);
 		setName(name);
 		grid = new Grid(w, h);
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
 		drawTiles(g);
 		drawBorders(g);
 	}
@@ -37,11 +40,6 @@ public class Map extends Canvas {
 			}
 		}
 		g.setColor(BACKGROUND_GRID_COLOR);
-	}
-
-	@Override
-	public void update(Graphics g) {
-		paint(g);
 	}
 
 	private void drawTiles(Graphics g) {
