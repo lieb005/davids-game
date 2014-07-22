@@ -27,7 +27,7 @@ import javax.swing.JTextField;
 
 public class Editor extends JApplet implements ActionListener {
 
-	private Map edit;
+	private Map edit; 
 
 	public static void main(String[] args) {
 		final JFrame window;
