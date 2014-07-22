@@ -1,16 +1,16 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -49,9 +49,9 @@ public class Editor extends JApplet implements ActionListener {
 		e.init();
 		e.start();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//window.setResizable(false);
+		// window.setResizable(false);
 		// window.setLayout(null);
-		window.setSize(new Dimension(120, 722));
+		window.setSize(new Dimension(1200, 722));
 		// window.pack();
 		window.setVisible(true);
 	}
@@ -66,9 +66,9 @@ public class Editor extends JApplet implements ActionListener {
 		setLayout(new BorderLayout());
 
 		// 950 / Tile.TILE_SIZE, 722 /Tile.TILE_SIZE
-		edit = new Map("New Map", 0, 0);
+		edit = new Map("New Map", 950 / Tile.TILE_SIZE, 722 / Tile.TILE_SIZE);
 		add(new JScrollPane(edit), "Center");
-//		edit.setBounds(0, 0, 950, 722);
+		// edit.setBounds(0, 0, 950, 722);
 		// edit.setVisible(true);
 
 		JTabbedPane labelPanel = new JTabbedPane();
@@ -125,6 +125,13 @@ public class Editor extends JApplet implements ActionListener {
 		editMenu.add(cut);
 		editMenu.add(paste);
 		setJMenuBar(mBar);
+		mBar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				validate();
+				invalidate();
+			}
+		});
 		validate();
 		invalidate();
 	}
@@ -142,6 +149,7 @@ public class Editor extends JApplet implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String buttonLabel = ((AbstractButton) e.getSource()).getText();
 		if (buttonLabel == "New Map") {
+			propertiesDialog(true);
 		}
 		if (buttonLabel == "Save Map") {
 			Controller.save(getName(), edit);
@@ -161,9 +169,10 @@ public class Editor extends JApplet implements ActionListener {
 			widthTextField = new JTextField("20", 5);
 			heightTextField = new JTextField("20", 5);
 		} else {
-			widthTextField = new JTextField(String.valueOf(edit.getWidth()), 5);
-			heightTextField = new JTextField(String.valueOf(edit.getHeight()),
-					5);
+			widthTextField = new JTextField(
+					String.valueOf(edit.getGridWidth()), 5);
+			heightTextField = new JTextField(String.valueOf(edit
+					.getGridHeight()), 5);
 		}
 		sizePanel.add(xLabel);
 		sizePanel.add(widthTextField);
@@ -178,7 +187,7 @@ public class Editor extends JApplet implements ActionListener {
 
 		JPanel buttonPanel = new JPanel();
 		JButton okButton = new JButton("Okay");
-		JButton cancelButton = new JButton("Cancel");
+		final JButton cancelButton = new JButton("Cancel");
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
 
@@ -187,12 +196,14 @@ public class Editor extends JApplet implements ActionListener {
 				new JPanel[] { sizePanel });
 		options.setWantsInput(true);
 
+		final JDialog d;
 		if (newMapBool) {
 			options.setInitialSelectionValue("New Map 1");
+			d = options.createDialog("New Map");
 		} else {
 			options.setInitialSelectionValue(edit.getName());
+			d = options.createDialog("Properties For " + edit.getName());
 		}
-		final JDialog d = options.createDialog("New Map");
 
 		okButton.addActionListener(new ActionListener() {
 
@@ -203,7 +214,7 @@ public class Editor extends JApplet implements ActionListener {
 				if (newMapBool || edit == null) {
 					edit = new Map(nameTextField.getText(), w, h);
 				} else {
-					edit.setSize(w, h);
+					edit.setGridSize(w, h);
 				}
 			}
 		});
@@ -215,6 +226,14 @@ public class Editor extends JApplet implements ActionListener {
 			}
 		});
 		d.setVisible(true);
+		d.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				cancelButton.getActionListeners()[0]
+						.actionPerformed(new ActionEvent(cancelButton,
+								ActionEvent.ACTION_PERFORMED, "Cancelled"));
+			}
+		});
 		// add a window listener maybe to get values on close
 	}
 }

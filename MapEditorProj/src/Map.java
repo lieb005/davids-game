@@ -24,54 +24,60 @@ public class Map extends Canvas {
 	@Override
 	public void paint(Graphics g) {
 		drawTiles(g);
+		drawBorders(g);
 	}
 
+	private void drawBorders(Graphics g) {
+		
+	}
+
+	@Override
 	public void update(Graphics g) {
 		paint(g);
 	}
 
-	public ArrayList<ArrayList<WorldObj[]>> getGrid() {
-		return grid;
-	}
-
-	public void drawTiles(Graphics g) {
+	private void drawTiles(Graphics g) {
 		g.setColor(BACKGROUND_GRID_COLOR);
 		for (int x = 0; x < grid.size(); x++) {
 			for (int y = 0; y < grid.get(x).size(); y++) {
 				BufferedImage img = grid.get(x).get(y)[0].getImage();
 				g.drawImage(img, 0, 0,
-						(int) (x * Tile.TILE_SIZE * scaleFactor), (int) (y
-								* Tile.TILE_SIZE * scaleFactor),
-						img.getWidth(), img.getHeight(),
-						(int) (Tile.TILE_SIZE * scaleFactor),
-						(int) (Tile.TILE_SIZE * scaleFactor), null);
+						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
+								* WorldObj.TILE_SIZE * scaleFactor),
+								img.getWidth(), img.getHeight(),
+								(int) (WorldObj.TILE_SIZE * scaleFactor),
+								(int) (WorldObj.TILE_SIZE * scaleFactor), null);
 				img = grid.get(x).get(y)[1].getImage();
-
+				
 				g.drawImage(img, 0, 0,
-						(int) (x * Tile.TILE_SIZE * scaleFactor), (int) (y
-								* Tile.TILE_SIZE * scaleFactor),
-						img.getWidth(), img.getHeight(), img.getWidth(),
-						img.getHeight(), null);
-
+						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
+								* WorldObj.TILE_SIZE * scaleFactor),
+								img.getWidth(), img.getHeight(), img.getWidth(),
+								img.getHeight(), null);
+				
 			}
 		}
 	}
+	public ArrayList<ArrayList<WorldObj[]>> getGrid() {
+		return grid;
+	}
 
-	public void setSize(int w, int h) {
-		grid.resize(w, h);
+
+	public void setGridSize(int width, int height) {
+		grid.resize(width, height);
 		repaint();
 	}
 
-	public int getWidth() {
+	public int getGridWidth() {
 		return (int) grid.getSize().getWidth();
 	}
 
-	public int getHeight() {
+	public int getGridHeight() {
 		return (int) grid.getSize().getHeight();
 
 	}
 
-	public Dimension getSize() {
+	public Dimension getGridSize() {
 		return grid.getSize();
 	}
 
@@ -94,16 +100,23 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 	public void resize(int w, int h) {
 		// don't need to check the y direction because the if x = 0, then there
 		// can be no y.
-		System.out.println("Wanted: (" + h + ", " + w + ")");
-		if (size() == 0 && w == 0 && h == 0) {
+		// print numbers we are fed
+		System.out.println("Wanted: (" + w + ", " + h + ")");
+		// If has no width or height, exit
+		if (w == 0 && h == 0) {
+			if (size() != 0) {
+				// remove everything
+				removeRange(0, size() - 1);
+			}
 			return;
 		}
+		// loop through the collection to add or remove
+		// Set the largest of both the size and the new width
 		for (int x = 0; x < Math.max(size(), w); x++) {
-			if (size() == 0 && w != 0) {
-				add(new ArrayList<WorldObj[]>());
-			}
-			if (size() >= x) {
-				add(new ArrayList<WorldObj[]>());
+			// if empty or we have looped past the max index, add one to start
+			// out
+			if (size() == 0 || size() <= x) {
+				add(x, new ArrayList<WorldObj[]>());
 			} else {
 				remove(x);
 				continue;
@@ -120,7 +133,7 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 			}
 		}
 		try {
-			System.out.println("Wanted: (" + h + ", " + w + ")    Got: ("
+			System.out.println("Wanted: (" + w + ", " + h + ")    Got: ("
 					+ size() + ", " + get(0).size() + ")");
 		} catch (IndexOutOfBoundsException e) {
 			e.printStackTrace();
