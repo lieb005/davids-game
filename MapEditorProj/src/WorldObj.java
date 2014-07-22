@@ -2,7 +2,7 @@ import java.awt.image.BufferedImage;
 
 // use this to override later.  Too much shared code.
 public abstract class WorldObj {
-	public static final int TILE_SIZE = 100;
+	public static final int TILE_SIZE = 25;
 	
 	
 	private int code;

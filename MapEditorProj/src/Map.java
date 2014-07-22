@@ -8,6 +8,7 @@ import java.util.ArrayList;
 // we will actually put the grid on this
 public class Map extends Canvas {
 	public static final Color FOREGROUND_GRID_COLOR = Color.BLACK;
+	public static final Color GRID_GRID_COLOR = Color.RED;
 	public static final Color BACKGROUND_GRID_COLOR = Color.WHITE;
 
 	private double scaleFactor = 2;
@@ -28,7 +29,14 @@ public class Map extends Canvas {
 	}
 
 	private void drawBorders(Graphics g) {
-		
+		g.setColor(GRID_GRID_COLOR);
+		for (int x = 0; x < getGridWidth(); x++) {
+			for (int y = 0; y < getGridHeight(); y++) {
+				g.drawRect(x * Tile.TILE_SIZE, y * Tile.TILE_SIZE,
+						Tile.TILE_SIZE, Tile.TILE_SIZE);
+			}
+		}
+		g.setColor(BACKGROUND_GRID_COLOR);
 	}
 
 	@Override
@@ -44,24 +52,24 @@ public class Map extends Canvas {
 				g.drawImage(img, 0, 0,
 						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
 								* WorldObj.TILE_SIZE * scaleFactor),
-								img.getWidth(), img.getHeight(),
-								(int) (WorldObj.TILE_SIZE * scaleFactor),
-								(int) (WorldObj.TILE_SIZE * scaleFactor), null);
+						img.getWidth(), img.getHeight(),
+						(int) (WorldObj.TILE_SIZE * scaleFactor),
+						(int) (WorldObj.TILE_SIZE * scaleFactor), null);
 				img = grid.get(x).get(y)[1].getImage();
-				
+
 				g.drawImage(img, 0, 0,
 						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
 								* WorldObj.TILE_SIZE * scaleFactor),
-								img.getWidth(), img.getHeight(), img.getWidth(),
-								img.getHeight(), null);
-				
+						img.getWidth(), img.getHeight(), img.getWidth(),
+						img.getHeight(), null);
 			}
 		}
+		g.setColor(BACKGROUND_GRID_COLOR);
 	}
+
 	public ArrayList<ArrayList<WorldObj[]>> getGrid() {
 		return grid;
 	}
-
 
 	public void setGridSize(int width, int height) {
 		grid.resize(width, height);

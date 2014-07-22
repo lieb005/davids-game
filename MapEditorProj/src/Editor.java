@@ -234,6 +234,5 @@ public class Editor extends JApplet implements ActionListener {
 								ActionEvent.ACTION_PERFORMED, "Cancelled"));
 			}
 		});
-		// add a window listener maybe to get values on close
 	}
 }
