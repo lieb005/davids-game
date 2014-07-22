@@ -22,10 +22,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 
 public class Editor extends JApplet implements ActionListener {
 
