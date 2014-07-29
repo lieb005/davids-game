@@ -1,19 +1,24 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class TileLabel extends JPanel {
 	int lastX = 0;
 	int lastY = 70;
-	public static Tile tile;
 	JLabel lab;
-	public static Decoration decoration;
-	public static  ArrayList<Tile> tiles;
-	public static ArrayList<Decoration> decor;
+	public static  ArrayList<JButton> tiles;
+	public static ArrayList<JButton> decor;
 	
 	public TileLabel(boolean t){//if true tile panel, if false, decorations
 		this.setLayout(null);
@@ -22,20 +27,23 @@ public class TileLabel extends JPanel {
 		this.setPreferredSize(new Dimension(226, 660));
 
 		if(t){
-			tiles = new ArrayList<Tile>();
+			tiles = new ArrayList<JButton
+					>();
 			lab = new JLabel("Tiles");
 			lab.setBounds(70, 30, 100, 37);
 			try{
-				//getTiles();
+				System.out.println("Tiles: " + Controller.getNumObjs(true));
+				getTiles();
 			}catch(Exception e){
 				System.out.println("Some tiles failed to load!");
 			}
 		}else{
-			decor = new ArrayList<Decoration>();
+			decor = new ArrayList<JButton>();
 			lab = new JLabel("Decorations");
 			lab.setBounds(30, 30, 300, 37);
 			try{
-				//getDecor();
+				System.out.println("Decor: " + Controller.getNumObjs(false));
+				getDecor();
 			}catch(Exception e){
 				System.out.println("Some Decorations failed to load!");
 			}
@@ -46,22 +54,23 @@ public class TileLabel extends JPanel {
 	}
 	
 	
-	/*public void getTiles(){
-		for(int i = 0; i < Controller.getNumObj(true) -1; i++){
-			tile = new Tile(i);
-			tile.giveListener(false);
-			if(lastX + 10 + Tile.size <= 216){
+	public void getTiles(){
+		for(int i = 0; i < Controller.getNumObjs(true) -1; i++){
+			Hashtable<Integer, BufferedImage> tileImages = ImageHandler.getTiles();
+			Image temp = Toolkit.getDefaultToolkit().createImage(tileImages.get(i).getSource());
+			JButton tile = new JButton(new ImageIcon(temp));
+			if(lastX + 10 + WorldObj.TILE_SIZE <= 216){
 				if( i > 0){
-					lastX +=  10 + Tile.size;
+					lastX +=  10 + WorldObj.TILE_SIZE;
 				}else{
 					lastX += 10;
 					
 				}
 			}else{
 				lastX = 10;
-				lastY += ( 10 + Tile.size);
+				lastY += ( 10 + WorldObj.TILE_SIZE);
 			}
-			tile.setBounds(lastX, lastY, Tile.size, Tile.size);
+			tile.setBounds(lastX, lastY, WorldObj.TILE_SIZE, WorldObj.TILE_SIZE);
 			tiles.add(tile);
 			this.add(tiles.get(i));
 		}
@@ -72,11 +81,13 @@ public class TileLabel extends JPanel {
 		int startY = 70;
 		int maxHeight = 0;
 		int prevW = 0;
-		for(int i = 0; i < Controller.getNumObj(false); i++){
-			decoration = new Decoration(i);
-			decoration.giveListener(false);
-			int w = decoration.img.getWidth();
-			int h = decoration.img.getHeight();
+		for(int i = 0; i < Controller.getNumObjs(false); i++){
+			Hashtable<Integer, BufferedImage> decorImages = ImageHandler.getDecor();
+			Image temp = Toolkit.getDefaultToolkit().createImage(decorImages.get(i).getSource());
+			JButton decoration = new JButton(new ImageIcon(temp));
+			
+			int w = decorImages.get(i).getWidth();
+			int h = decorImages.get(i).getHeight();
 			if(h > maxHeight){
 				maxHeight = h;
 			}
@@ -97,7 +108,7 @@ public class TileLabel extends JPanel {
 			decor.add(decoration);
 			this.add(decor.get(i));
 		}
-	}*/
+	}
 	/*
 	public static void blankBorders(){
 		

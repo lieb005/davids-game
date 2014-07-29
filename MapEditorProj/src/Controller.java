@@ -85,4 +85,13 @@ public class Controller {// responsible for common used methods for interacting
 				|| new File("/World/Tiles/", name).exists()
 				|| new File("/World/Decorations/", name).exists();
 	}
+	public static int getNumObjs(boolean tile){
+		File dir;
+		if(tile){
+			dir = new File("./World/Tiles");
+		}else{
+			dir = new File("./World/Decorations");
+		}
+		return dir.list().length - 1;
+	}
 }
