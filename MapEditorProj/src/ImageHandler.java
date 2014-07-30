@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 
 public class ImageHandler {
 	// it will hold all of the images for the tiles
-	private static Hashtable<Integer, BufferedImage> tileImageList = new Hashtable<Integer, BufferedImage>();
+	private static Hashtable<Integer, BufferedTile> tileImageList = new Hashtable<Integer, BufferedTile>();
 	// it will hold all of the images for the decor
-	private static Hashtable<Integer, BufferedImage> decorImageList = new Hashtable<Integer, BufferedImage>();
+	private static Hashtable<Integer, BufferedTile> decorImageList = new Hashtable<Integer, BufferedTile>();
 
 	// used to load all the images
 	public static int loadImages(boolean decor) {
@@ -41,19 +41,16 @@ public class ImageHandler {
 		//System.out.println(directory.listFiles().length);
 		System.out.println(directory.getAbsolutePath());
 		if (directory.isDirectory()) {
-			BufferedImage img = null;
+			BufferedTile img = null;
 			for (File imageFile : directory.listFiles(filter)) {
 				try {
-					img = ImageIO.read(imageFile);
-					String[] name = imageFile.getName().substring(1)
-							.split("[()]", 3);
-					Integer i = Integer.parseInt(name[0]);
-					img = copyImageNamed(img, name[1], i);
+					img = new BufferedTile(imageFile);
+					img.setBufferedImage(copyImageNamed(img.getBufferedImage(), img.getName(), img.getIndex()));
 					//System.out.println(new Integer(name[0]));
 					if (decor) {
-						decorImageList.put(new Integer(name[0]), img);
+						decorImageList.put(img.getIndex(), img);
 					} else {
-						tileImageList.put(new Integer(name[0]), img);
+						tileImageList.put(img.getIndex(), img);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -79,9 +76,9 @@ public class ImageHandler {
 	public static BufferedImage getImage(int index, boolean tile)
 			throws ArrayIndexOutOfBoundsException {
 		if (tile) {
-			return copyImage(tileImageList.get(new Integer(index + 1)));
+			return copyImage(tileImageList.get(new Integer(index + 1)).getBufferedImage());
 		} else {
-			return copyImage(decorImageList.get(new Integer(index + 1)));
+			return copyImage(decorImageList.get(new Integer(index + 1)).getBufferedImage());
 		}
 	}
 
@@ -109,11 +106,11 @@ public class ImageHandler {
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
 	}
 
-	public static Hashtable<Integer, BufferedImage> getTiles() {
+	public static Hashtable<Integer, BufferedTile> getTiles() {
 		return tileImageList;
 	}
 
-	public static Hashtable<Integer, BufferedImage> getDecor() {
+	public static Hashtable<Integer, BufferedTile> getDecor() {
 		return decorImageList;
 	}
 
