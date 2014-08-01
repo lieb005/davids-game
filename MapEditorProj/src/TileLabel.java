@@ -33,7 +33,6 @@ public class TileLabel extends JPanel {
 			lab = new JLabel("Tiles");
 			lab.setBounds(70, 30, 100, 37);
 			try {
-				System.out.println("Tiles: " + Controller.getNumObjs(true));
 				getTiles();
 			} catch (Exception e) {
 				System.out.println("Some tiles failed to load!");
@@ -43,7 +42,6 @@ public class TileLabel extends JPanel {
 			lab = new JLabel("Decorations");
 			lab.setBounds(30, 30, 300, 37);
 			try {
-				System.out.println("Decor: " + Controller.getNumObjs(false));
 				getDecor();
 			} catch (Exception e) {
 				System.out.println("Some Decorations failed to load!");

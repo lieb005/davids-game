@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Hashtable;
 
-import javax.imageio.ImageIO;
-
 public class ImageHandler {
 	// it will hold all of the images for the tiles
 	private static Hashtable<Integer, BufferedTile> tileImageList = new Hashtable<Integer, BufferedTile>();
@@ -106,6 +104,14 @@ public class ImageHandler {
 		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
 		WritableRaster raster = source.copyData(null);
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
+	}
+	
+	public static BufferedTile getBufferedTile(int code, boolean tile){
+		if(tile){
+			return tileImageList.get(code);
+		}else{
+			return decorImageList.get(code);
+		}
 	}
 
 	public static Hashtable<Integer, BufferedTile> getTiles() {

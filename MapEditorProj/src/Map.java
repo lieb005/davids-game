@@ -1,18 +1,23 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 // we will actually put the grid on this
-public class Map extends JPanel {
+public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public static final Color FOREGROUND_GRID_COLOR = Color.BLACK;
-	public static final Color GRID_GRID_COLOR = Color.RED;
+	public static final Color GRID_GRID_COLOR = Color.BLACK;
 	public static final Color BACKGROUND_GRID_COLOR = Color.WHITE;
-
-	private double scaleFactor = 2;
+	static int scaleFactor;
+	
+	private boolean scaleIt = true;
 
 	// stored as grid.get(x).get(y)[0] = tile
 	// grid.get(x).get(y)[1] = decor
@@ -22,21 +27,30 @@ public class Map extends JPanel {
 		super(true);
 		setSize(w * Tile.TILE_SIZE, h * Tile.TILE_SIZE);
 		setName(name);
+		setScale(2);
 		grid = new Grid(w, h);
+		addMouseListener(this);
+		addMouseMotionListener(this);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		drawTiles(g);
 		drawBorders(g);
+	}
+	
+	public static void setScale(int newScale){
+		scaleFactor = newScale;
 	}
 
 	private void drawBorders(Graphics g) {
 		g.setColor(GRID_GRID_COLOR);
 		for (int x = 0; x < getGridWidth(); x++) {
-			for (int y = 0; y < getGridHeight(); y++) {
-				g.drawRect(x * Tile.TILE_SIZE, y * Tile.TILE_SIZE,
-						Tile.TILE_SIZE, Tile.TILE_SIZE);
+			for (int y = 0; y < getGridHeight(); y++) {// with scaling
+				g.drawRect(x * Tile.TILE_SIZE * scaleFactor, y
+						* Tile.TILE_SIZE * scaleFactor, Tile.TILE_SIZE
+						* scaleFactor, Tile.TILE_SIZE * scaleFactor);
 			}
 		}
 		g.setColor(BACKGROUND_GRID_COLOR);
@@ -96,6 +110,68 @@ public class Map extends JPanel {
 	public void setName(String name) {
 		super.setName(name);
 	}
+
+	@Override
+	public void mouseClicked(MouseEvent c) {
+		// TODO Auto-generated method stub
+		System.out.println("CLICK!");
+		repaint();
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println(getTileXY(e.getPoint()));
+		repaint();
+	}
+
+	public Dimension getTileXY(Point mouse) {// returns the XY coordinates of
+												// the clicke tile
+		int scaleMultiplier = scaleFactor;
+		if (scaleIt == false) {
+			scaleMultiplier = 1;
+		}
+		Dimension loc = new Dimension(
+				((int) (mouse.getX()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
+						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1,
+				((int) (mouse.getY()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
+						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1);
+		
+		if((int)loc.getWidth() <= grid.size() -1 && (int)loc.getHeight() <= grid.get(0).size() -1){
+			return loc;
+		}else{
+			loc = null;
+			return loc;
+		}
+	}
 }
 
 class Grid extends ArrayList<ArrayList<WorldObj[]>> {
@@ -112,7 +188,7 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 		if (w == 0 && h == 0) {
 			if (size() != 0) {
 				// remove everything
-				removeRange(0, size() - 1);
+				removeRange(0, size());
 			}
 			return;
 		}
@@ -121,7 +197,7 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 		for (int x = 0; x < Math.max(size(), w); x++) {
 			// if empty or we have looped past the max index, add one to start
 			// out
-			if (size() == 0 || size() <= x) {
+			if (size() <= x || size() == 0) {
 				add(x, new ArrayList<WorldObj[]>());
 			} else {
 				remove(x);

@@ -32,7 +32,7 @@ public class Controller {// responsible for common used methods for interacting
 
 	public static void save(String name, Map map) {
 		try {
-			FileWriter write = new FileWriter("Maps/" + name, false);
+			FileWriter write = new FileWriter(".Maps/" + name, false);
 			BufferedWriter out = new BufferedWriter(write);
 			for (ArrayList<WorldObj[]> row : map.getGrid()) {
 				for (WorldObj[] t : row) {
@@ -51,7 +51,7 @@ public class Controller {// responsible for common used methods for interacting
 		try {
 			Map map = new Map(name, 0, 0);
 
-			read = new BufferedReader(new FileReader(new File("Maps/" + name)));
+			read = new BufferedReader(new FileReader(new File(".Maps/" + name)));
 			int y = 0;
 			while (read.ready()) {
 				int x = 0;
@@ -81,9 +81,9 @@ public class Controller {// responsible for common used methods for interacting
 	}
 
 	public static boolean checkFileExistance(String name) { // true: file exists
-		return new File("/Maps/", name).exists()
-				|| new File("/World/Tiles/", name).exists()
-				|| new File("/World/Decorations/", name).exists();
+		return new File("./Maps/", name).exists()
+				|| new File("./World/Tiles/", name).exists()
+				|| new File("./World/Decorations/", name).exists();
 	}
 	public static int getNumObjs(boolean tile){
 		File dir;
