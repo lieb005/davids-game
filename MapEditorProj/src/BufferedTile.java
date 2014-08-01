@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 public class BufferedTile{
 	private BufferedImage img = null;
 	private ImageIcon icon = null;
+	boolean isTile;
 	private int index;
 	private String name;
 
@@ -23,6 +24,10 @@ public class BufferedTile{
 		String[] data = imageFile.getName().substring(1).split("[()]", 3);
 		index = Integer.parseInt(data[0]);
 		name = data[1].substring(0, data[1].length() - 4);
+	}
+	
+	public void setType(boolean tileType){
+		isTile = tileType;
 	}
 	
 	public void setBufferedImage(BufferedImage newImage){

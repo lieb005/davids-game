@@ -1,15 +1,12 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -22,6 +19,8 @@ public class TileLabel extends JPanel {
 	JLabel lab;
 	public static ArrayList<JButton> tiles;
 	public static ArrayList<JButton> decor;
+	public static boolean onTile = true;
+	public static int selectedObjectIndex = 0;
 
 	public TileLabel(boolean t) {// if true tile panel, if false, decorations
 		this.setLayout(null);
@@ -80,16 +79,12 @@ public class TileLabel extends JPanel {
 			}
 			tile.setBounds(lastX, lastY, WorldObj.TILE_SIZE, WorldObj.TILE_SIZE);
 			tile.setToolTipText(tileImages.get(i).getName());
-			tile.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					System.out.println("Click");
-
-				}
-			});
+			selectedObjectIndex = i;
+			tile = addActionListener(i, tile, true);
 			tiles.add(tile);
 			this.add(tiles.get(i));
 		}
+		selectedObjectIndex = 0;
 	}
 
 	public void getDecor() {
@@ -127,17 +122,40 @@ public class TileLabel extends JPanel {
 			decoration.setBounds(startX, startY, w, h);
 			decoration.setToolTipText(decorImages.get(i).getName());
 			prevW = w;
+			decoration = addActionListener(i, decoration, false);
 			decor.add(decoration);
 			this.add(decor.get(i));
 		}
 	}
 
-	public static void setBorders() {
+	public static void blankBorders() {
 		for (JButton t : TileLabel.tiles) {
 			t.setBorder(null);
 		}
 		for (JButton d : TileLabel.decor) {
 			d.setBorder(null);
 		}
+	}
+	
+	//this is kinda roundabout, but I couldn't find another way. It works though!
+	public JButton addActionListener(final int index, JButton obj, final boolean tile){
+		final LineBorder b = new LineBorder(Color.RED);
+		obj.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {//fix this
+				if(tile){
+					blankBorders();
+					onTile = true;
+					selectedObjectIndex = index;
+					tiles.get(index).setBorder(b);
+				}else{
+					blankBorders();
+					onTile = false;
+					selectedObjectIndex = index;
+					decor.get(index).setBorder(b);
+				}
+			}
+		});
+		return obj;
 	}
 }

@@ -66,7 +66,7 @@ public class Editor extends JApplet implements ActionListener {
 		setLayout(new BorderLayout());
 
 		// 950 / Tile.TILE_SIZE, 722 /Tile.TILE_SIZE
-		edit = new Map("New Map", 950 / Tile.TILE_SIZE, 722 / Tile.TILE_SIZE);
+		edit = new Map("New Map", 10, 10);
 		add(new JScrollPane((JPanel) edit), "Center");
 		// edit.setBounds(0, 0, 950, 722);
 		// edit.setVisible(true);

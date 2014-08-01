@@ -33,10 +33,10 @@ public class ImageHandler {
 			}
 		};
 		File directory;
-		if (decor) {
-			directory = new File("./World/Decorations/");
-		} else {
+		if (decor == false) {
 			directory = new File("./World/Tiles/");
+		} else {
+			directory = new File("./World/Decorations/");
 		}
 		//System.out.println(directory.listFiles().length);
 		System.out.println(directory.getAbsolutePath());
@@ -47,10 +47,12 @@ public class ImageHandler {
 					img = new BufferedTile(imageFile);
 					img.setBufferedImage(copyImageNamed(img.getBufferedImage(), img.getName(), img.getIndex()));
 					//System.out.println(new Integer(name[0]));
-					if (decor) {
-						decorImageList.put(img.getIndex(), img);
-					} else {
+					if (decor == false) {
+						img.setType(true);
 						tileImageList.put(img.getIndex(), img);
+					} else {
+						img.setType(false);
+						decorImageList.put(img.getIndex(), img);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
