@@ -7,13 +7,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -24,35 +23,24 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-public class Editor extends JApplet implements ActionListener {
+public class Editor extends JApplet implements ActionListener{
 
-	private Map edit; 
+	static Map edit; 
+	static JFrame window;
+	JMenuItem editMode;
+	static Editor e;
 
 	public static void main(String[] args) {
-		final JFrame window;
 		window = new JFrame("Map Creator");
-		Editor e = new Editor();
+		e = new Editor();
 		window.add(e);
-		e.addPropertyChangeListener(new PropertyChangeListener() {
-
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (evt.getPropertyName() == "name") {
-					window.setTitle("Map Creator - "
-							+ (String) evt.getNewValue());
-					// System.out.println(evt.getPropertyName() + " = " +
-					// evt.getNewValue());
-				}
-			}
-		});
+		
 		e.init();
 		e.start();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// window.setResizable(false);
-		// window.setLayout(null);
 		window.setSize(new Dimension(1200, 722));
-		// window.pack();
 		window.setVisible(true);
 	}
 
@@ -64,10 +52,9 @@ public class Editor extends JApplet implements ActionListener {
 		ImageHandler.loadImages(true);
 
 		setLayout(new BorderLayout());
-
-		// 950 / Tile.TILE_SIZE, 722 /Tile.TILE_SIZE
-		edit = new Map("New Map", 10, 10);
-		add(new JScrollPane((JPanel) edit), "Center");
+		
+		edit = new Map("New Map", 5, 5);
+		add(new JScrollPane(edit), "Center");
 		// edit.setBounds(0, 0, 950, 722);
 		// edit.setVisible(true);
 
@@ -94,17 +81,36 @@ public class Editor extends JApplet implements ActionListener {
 		// file
 		JMenuItem newMap = new JMenuItem("New Map");
 		newMap.addActionListener(this);
-		JMenuItem open = new JMenuItem("Open previous project");
-		JMenuItem save = new JMenuItem("Save map");
+		JMenuItem open = new JMenuItem("Open Map");
+		open.addActionListener(this);
+		JMenuItem save = new JMenuItem("Save Map");
 		save.addActionListener(this);
 		JMenuItem del = new JMenuItem("Delete this map");
+		del.addActionListener(this);
 
 		// edit
 		JMenuItem undo = new JMenuItem("Undo");
+		undo.addActionListener(this);
 		JMenuItem redo = new JMenuItem("Redo");
+		redo.addActionListener(this);
 		JMenuItem copy = new JMenuItem("Copy Selection");
+		copy.addActionListener(this);
 		JMenuItem cut = new JMenuItem("Cut Selection");
+		cut.addActionListener(this);
 		JMenuItem paste = new JMenuItem("Paste");
+		paste.addActionListener(this);
+		
+		//properties
+		JMenuItem resize = new JMenuItem("Map Data");
+		resize.addActionListener(this);
+		editMode = new JMenuItem("Editing Mode");
+		editMode.addActionListener(this);
+		JMenuItem toggleGrid = new JMenuItem("Show/Hide Grid");
+		toggleGrid.addActionListener(this);
+		JMenuItem timeSet = new JMenuItem("Set Time");
+		timeSet.addActionListener(this);
+		JMenuItem showCols = new JMenuItem("Show/Hide Collision Boxes");
+		showCols.addActionListener(this);
 
 		// adds
 		mBar.add(fileMenu);
@@ -124,6 +130,13 @@ public class Editor extends JApplet implements ActionListener {
 		editMenu.add(copy);
 		editMenu.add(cut);
 		editMenu.add(paste);
+		
+		propMenu.add(resize);
+		propMenu.add(showCols);
+		propMenu.add(editMode);
+		propMenu.add(toggleGrid);
+		propMenu.add(timeSet);
+		
 		setJMenuBar(mBar);
 		mBar.addMouseListener(new MouseAdapter() {
 			@Override
@@ -136,14 +149,17 @@ public class Editor extends JApplet implements ActionListener {
 		invalidate();
 	}
 
-	public void setTitle(String title) {
-		if (getPropertyChangeListeners().length > 0) {
-			String old = getName();
-			setName(title);
-			getPropertyChangeListeners()[0]
-					.propertyChange(new PropertyChangeEvent(this, "name", old,
-							title));
-		}
+	public static void setTitle(String title) {
+		window.setTitle("Map Creator - " + title);
+	}
+	
+	public static void setMap(Map m){
+		edit.grid.resize(0, 0);
+		edit.grid.resize(m.getGridWidth(), m.getGridHeight());
+		edit.grid = m.grid;
+		edit.setName(m.getName());
+		edit.setScale(2);
+		e.repaint();
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -151,8 +167,33 @@ public class Editor extends JApplet implements ActionListener {
 		if (buttonLabel == "New Map") {
 			propertiesDialog(true);
 		}
+		if(buttonLabel == "Open Map"){
+			JFileChooser choose = new JFileChooser("./Maps/");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(".txt Files", "txt");
+			choose.setFileFilter(filter);
+			choose.setFileHidingEnabled(true);
+			int returnVal = choose.showOpenDialog(this);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				Controller.open(choose.getSelectedFile().getName());
+			}
+		}
 		if (buttonLabel == "Save Map") {
-			Controller.save(getName(), edit);
+			Controller.save(edit);
+		}
+		if(e.getSource() == editMode){
+			if(buttonLabel.equals("Editing Mode")){
+				edit.setScale(1);
+				editMode.setText("Game Mode");
+			}else{
+				edit.setScale(2);
+				editMode.setText("Editing Mode");
+			}
+		}
+		if(buttonLabel == "Show/Hide Grid"){
+			edit.setGridVisability(!edit.showGrid);
+		}
+		if(buttonLabel == "Map Data"){
+			propertiesDialog(false);
 		}
 
 	}
@@ -181,7 +222,7 @@ public class Editor extends JApplet implements ActionListener {
 
 		// JPanel namePanel = new JPanel();
 		// JLabel nameLabel = new JLabel("Name:");
-		// final JTextField nameTextField = new JTextField(15);
+		//final JTextField nameTextField = new JTextField(15);
 		// namePanel.add(nameLabel);
 		// namePanel.add(nameTextField);
 
@@ -191,17 +232,20 @@ public class Editor extends JApplet implements ActionListener {
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
 
-		final JOptionPane options = new JOptionPane("Map:",
+		JPanel name = new JPanel();
+		final JTextField nameField = new JTextField("Map Name", 20);
+		name.add(nameField);
+		
+		final JOptionPane options = new JOptionPane(null,
 				JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
-				new JPanel[] { sizePanel, buttonPanel });
-		options.setWantsInput(true);
+				new JPanel[] {buttonPanel, sizePanel, name });
 
 		final JDialog d;
 		if (newMapBool) {
-			options.setInitialSelectionValue("New Map 1");
+			nameField.setText("New Map");
 			d = options.createDialog("New Map");
 		} else {
-			options.setInitialSelectionValue(edit.getName());
+			nameField.setText(edit.getName());
 			d = options.createDialog("Properties For " + edit.getName());
 		}
 
@@ -221,9 +265,11 @@ public class Editor extends JApplet implements ActionListener {
 							"Only numbers can be used for a map dimension");
 				}
 				if (canWrite) {
-					if (newMapBool || edit == null) {
-						edit = new Map((String) (options.getInputValue()), w, h);
+					if (newMapBool || edit == null){
+						setMap(new Map(nameField.getText(), w, h));
+						
 					} else {
+						edit.setName(nameField.getText());
 						edit.setGridSize(w, h);
 					}
 					d.setVisible(false);

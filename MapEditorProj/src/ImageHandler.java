@@ -73,14 +73,6 @@ public class ImageHandler {
 	// We have to copy them so that if we use the graphics of one, it doesn't
 	// alter the actual image
 	// we need to add one because they start at -1
-	public static BufferedImage getImage(int index, boolean tile)
-			throws ArrayIndexOutOfBoundsException {
-		if (tile) {
-			return copyImage(tileImageList.get(new Integer(index + 1)).getBufferedImage());
-		} else {
-			return copyImage(decorImageList.get(new Integer(index + 1)).getBufferedImage());
-		}
-	}
 
 	// A roundabout way to copy the image, but we can't do it in a non
 	// roundabout way

@@ -5,52 +5,102 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 // we will actually put the grid on this
-public class Map extends JPanel implements MouseListener, MouseMotionListener {
+public class Map extends JPanel implements MouseListener, MouseMotionListener,
+		Runnable {
 	public static final Color FOREGROUND_GRID_COLOR = Color.BLACK;
 	public static final Color GRID_GRID_COLOR = Color.BLACK;
 	public static final Color BACKGROUND_GRID_COLOR = Color.WHITE;
-	static int scaleFactor;
-	
-	private boolean scaleIt = true;
+	static int scaleFactor = 2;
+
+	public boolean showGrid = true;
+
+	private Dimension lastTile = null;
 
 	// stored as grid.get(x).get(y)[0] = tile
 	// grid.get(x).get(y)[1] = decor
-	private Grid grid;
+	Grid grid = new Grid(0, 0);
 
+	private Thread updateDisplay;
+	
 	public Map(String name, int w, int h) {
 		super(true);
+		Editor.setTitle(name);
 		setSize(w * Tile.TILE_SIZE, h * Tile.TILE_SIZE);
 		setName(name);
-		setScale(2);
-		grid = new Grid(w, h);
+		grid.resize(w, h);
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		updateDisplay = new Thread(this);
+		this.setVisible(true);
+		updateDisplay.start();
+	}
+
+	@SuppressWarnings("static-access")
+	@Override
+	public void run() {
+		while (true) {
+			if (scaleFactor != 1) {
+				repaint();
+			}
+			try {
+				updateDisplay.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		drawTiles(g);
-		drawBorders(g);
+		if (showGrid) {
+			drawBorders(g);
+		}
+		g.dispose();
 	}
-	
-	public static void setScale(int newScale){
+
+	public void setScale(int newScale) {
 		scaleFactor = newScale;
+		repaint();
+	}
+
+	public void setGridVisability(boolean g) {
+		showGrid = g;
+		repaint();
+	}
+
+	public Dimension getTileXY(Point mouse) {// returns the XY coordinates of
+		// the clicked tile
+		int scaleMultiplier = scaleFactor;
+		Dimension loc = new Dimension(
+				((int) (mouse.getX()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
+						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1,
+				((int) (mouse.getY()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
+						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1);
+
+		if ((int) loc.getWidth() <= grid.size() - 1
+				&& (int) loc.getHeight() <= grid.get(0).size() - 1) {
+			return loc;
+		} else {
+			loc = null;
+			return loc;
+		}
 	}
 
 	private void drawBorders(Graphics g) {
 		g.setColor(GRID_GRID_COLOR);
 		for (int x = 0; x < getGridWidth(); x++) {
 			for (int y = 0; y < getGridHeight(); y++) {// with scaling
-				g.drawRect(x * Tile.TILE_SIZE * scaleFactor, y
-						* Tile.TILE_SIZE * scaleFactor, Tile.TILE_SIZE
-						* scaleFactor, Tile.TILE_SIZE * scaleFactor);
+				g.drawRect(x * Tile.TILE_SIZE * scaleFactor, y * Tile.TILE_SIZE
+						* scaleFactor, Tile.TILE_SIZE * scaleFactor,
+						Tile.TILE_SIZE * scaleFactor);
 			}
 		}
 		g.setColor(BACKGROUND_GRID_COLOR);
@@ -60,20 +110,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		g.setColor(BACKGROUND_GRID_COLOR);
 		for (int x = 0; x < grid.size(); x++) {
 			for (int y = 0; y < grid.get(x).size(); y++) {
-				BufferedImage img = grid.get(x).get(y)[0].getImage();
-				g.drawImage(img, 0, 0,
-						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
-								* WorldObj.TILE_SIZE * scaleFactor),
-						img.getWidth(), img.getHeight(),
-						(int) (WorldObj.TILE_SIZE * scaleFactor),
-						(int) (WorldObj.TILE_SIZE * scaleFactor), null);
-				img = grid.get(x).get(y)[1].getImage();
+				grid.get(x).get(y)[0].setXYLoc(x, y);
+				grid.get(x).get(y)[0].draw(g);
+			}
+		}
 
-				g.drawImage(img, 0, 0,
-						(int) (x * WorldObj.TILE_SIZE * scaleFactor), (int) (y
-								* WorldObj.TILE_SIZE * scaleFactor),
-						img.getWidth(), img.getHeight(), img.getWidth(),
-						img.getHeight(), null);
+		for (int x = 0; x < grid.size(); x++) {
+			for (int y = 0; y < grid.get(x).size(); y++) {
+				grid.get(x).get(y)[1].setXYLoc(x, y);
+				grid.get(x).get(y)[1].draw(g);
 			}
 		}
 		g.setColor(BACKGROUND_GRID_COLOR);
@@ -83,6 +128,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return grid;
 	}
 
+	public void setGrid(Grid g){
+		this.grid = g;
+	}
+	
 	public void setGridSize(int width, int height) {
 		grid.resize(width, height);
 		repaint();
@@ -109,12 +158,20 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	@Override
 	public void setName(String name) {
 		super.setName(name);
+		Editor.setTitle(name);
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent c) {
 		// TODO Auto-generated method stub
-		System.out.println("CLICK!");
+		if (c.isShiftDown() == false) {
+			try {
+				grid.setTile((int) getTileXY(c.getPoint()).getWidth(),
+						(int) getTileXY(c.getPoint()).getHeight());
+			} catch (Exception e) {
+				// out of bounds
+			}
+		}
 		repaint();
 	}
 
@@ -130,47 +187,54 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 
 	@Override
-	public void mousePressed(MouseEvent arg0) {
+	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+		if (e.isShiftDown()) {
+			try {
+				grid.setRotation((int) getTileXY(e.getPoint()).getWidth(),
+						(int) getTileXY(e.getPoint()).getHeight());
+				lastTile = getTileXY(e.getPoint());
+				repaint();
+			} catch (Exception ex) {
+			}
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println(getTileXY(e.getPoint()));
-		repaint();
-	}
+		if (e.isShiftDown() == false) {
+			try {
+				grid.setTile((int) getTileXY(e.getPoint()).getWidth(),
+						(int) getTileXY(e.getPoint()).getHeight());
+			} catch (Exception ex) {
+				// out of bounds
+			}
+		} else {// shift click to rotate
+			Point mouse = e.getPoint();
+			try {
+				if (getTileXY(mouse).width != lastTile.width
+						|| getTileXY(mouse).height != lastTile.height) {
+					grid.setRotation((int) getTileXY(e.getPoint()).getWidth(),
+							(int) getTileXY(e.getPoint()).getHeight());
+				}
+			} catch (Exception ex) {
 
-	public Dimension getTileXY(Point mouse) {// returns the XY coordinates of
-												// the clicke tile
-		int scaleMultiplier = scaleFactor;
-		if (scaleIt == false) {
-			scaleMultiplier = 1;
+			}
+			lastTile = getTileXY(mouse);
 		}
-		Dimension loc = new Dimension(
-				((int) (mouse.getX()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
-						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1,
-				((int) (mouse.getY()) + (WorldObj.TILE_SIZE * scaleMultiplier) - 1)
-						/ (WorldObj.TILE_SIZE * scaleMultiplier) - 1);
-		
-		if((int)loc.getWidth() <= grid.size() -1 && (int)loc.getHeight() <= grid.get(0).size() -1){
-			return loc;
-		}else{
-			loc = null;
-			return loc;
-		}
+		repaint();
 	}
 }
 
@@ -179,11 +243,11 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 		resize(w, h);
 	}
 
+	
 	public void resize(int w, int h) {
 		// don't need to check the y direction because the if x = 0, then there
 		// can be no y.
 		// print numbers we are fed
-		System.out.println("Wanted: (" + w + ", " + h + ")");
 		// If has no width or height, exit
 		if (w == 0 && h == 0) {
 			if (size() != 0) {
@@ -194,32 +258,52 @@ class Grid extends ArrayList<ArrayList<WorldObj[]>> {
 		}
 		// loop through the collection to add or remove
 		// Set the largest of both the size and the new width
-		for (int x = 0; x < Math.max(size(), w); x++) {
+		for (int x = Math.min(size(), w); x < Math.max(size(), w); x++) {
 			// if empty or we have looped past the max index, add one to start
 			// out
-			if (size() <= x || size() == 0) {
-				add(x, new ArrayList<WorldObj[]>());
-			} else {
+			if (w > size()) {
+				add(new ArrayList<WorldObj[]>());
+			}// if height given is smaller than size
+			else {
 				remove(x);
-				continue;
+				x--;
 			}
-			for (int y = 0; y < Math.max(get(x).size(), h); y++) {
-				if (size() >= x) {
-					get(x).add(
-							new WorldObj[] { new Tile(-1, 0),
-									new Decoration(-1) });
-				} else {
-					remove(y);
-					continue;
+		}
+		
+		for(int x = 0; x < size(); x++){
+			for (int y = Math.min(get(x).size(), h); y < Math.max(get(x).size(), h); y++) {
+				if(h > get(x).size()){
+					get(x).add(new WorldObj[] { new Tile(-1, 0),new Decoration(-1) });
+				}else{
+					get(x).remove(y);
+					y--;
 				}
 			}
 		}
-		try {
-			System.out.println("Wanted: (" + w + ", " + h + ")    Got: ("
-					+ size() + ", " + get(0).size() + ")");
-		} catch (IndexOutOfBoundsException e) {
-			e.printStackTrace();
+	}
+	 
+
+	public void setTile(int x, int y) {
+		if (TileLabel.onTile) {
+			get(x).get(y)[0] = new Tile(TileLabel.selectedObjectIndex,
+					WorldObj.ROTATION0);
+		} else {
+			get(x).get(y)[1] = new Decoration(TileLabel.selectedObjectIndex);
 		}
+	}
+
+	public void setRotation(int x, int y) {
+		Tile temp = (Tile) get(x).get(y)[0];
+		if (temp.getRotation() == 0) {
+			temp.setRotation(WorldObj.ROTATION1);
+		} else if (temp.getRotation() == 90) {
+			temp.setRotation(WorldObj.ROTATION2);
+		} else if (temp.getRotation() == 180) {
+			temp.setRotation(WorldObj.ROTATION3);
+		} else if (temp.getRotation() == 270) {
+			temp.setRotation(WorldObj.ROTATION0);
+		}
+		get(x).get(y)[0] = temp;
 	}
 
 	public Dimension getSize() {

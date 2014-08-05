@@ -91,7 +91,7 @@ public class TileLabel extends JPanel {
 		int maxHeight = 0;
 		int prevW = 0;
 		Hashtable<Integer, BufferedTile> decorImages = ImageHandler.getDecor();
-		for (int i = 0; i < Controller.getNumObjs(false); i++) {
+		for (int i = 0; i < Controller.getNumObjs(false) -1; i++) {
 			JButton decoration;
 			if(decorImages.get(i).getIcon() == null){
 			decoration = new JButton(new ImageIcon(Toolkit.getDefaultToolkit().createImage(
@@ -144,12 +144,21 @@ public class TileLabel extends JPanel {
 				if(tile){
 					blankBorders();
 					onTile = true;
-					selectedObjectIndex = index;
+					if(index != 0){
+						selectedObjectIndex = index;
+					}else{
+						selectedObjectIndex = -1;
+					}
+					
 					tiles.get(index).setBorder(b);
 				}else{
 					blankBorders();
 					onTile = false;
-					selectedObjectIndex = index;
+					if(index != 0){
+						selectedObjectIndex = index;
+					}else{
+						selectedObjectIndex = -1;
+					}
 					decor.get(index).setBorder(b);
 				}
 			}

@@ -1,3 +1,4 @@
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -6,18 +7,20 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 public class BufferedTile{
-	private BufferedImage img = null;
+	private BufferedImage buffImg = null;
 	private ImageIcon icon = null;
+	private Image image = null;
 	boolean isTile;
 	private int index;
 	private String name;
 
 	public BufferedTile(File imageFile){
 		if(imageFile.getName().toLowerCase().endsWith(".gif")){
-			icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(imageFile.getAbsolutePath()));
+			image = Toolkit.getDefaultToolkit().createImage(imageFile.getAbsolutePath());
+			icon = new ImageIcon(image);
 		}
 		try {
-			img = ImageIO.read(imageFile);
+			buffImg = ImageIO.read(imageFile);
 		} catch (IOException e) {
 			System.out.println(imageFile.getName() + "Failed to load");
 		}
@@ -31,7 +34,7 @@ public class BufferedTile{
 	}
 	
 	public void setBufferedImage(BufferedImage newImage){
-		img = newImage;
+		buffImg = newImage;
 	}
 	
 	public void setIcon(ImageIcon newIcon){
@@ -39,7 +42,11 @@ public class BufferedTile{
 	}
 	
 	public BufferedImage getBufferedImage(){
-		return img;
+		return buffImg;
+	}
+	
+	public Image getImage(){
+		return image;
 	}
 	
 	public ImageIcon getIcon(){
