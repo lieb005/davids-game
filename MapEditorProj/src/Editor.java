@@ -31,6 +31,8 @@ public class Editor extends JApplet implements ActionListener{
 	static JFrame window;
 	JMenuItem editMode;
 	static Editor e;
+	
+	static JScrollPane mapScroll;
 
 	public static void main(String[] args) {
 		window = new JFrame("Map Creator");
@@ -53,8 +55,13 @@ public class Editor extends JApplet implements ActionListener{
 
 		setLayout(new BorderLayout());
 		
-		edit = new Map("New Map", 5, 5);
-		add(new JScrollPane(edit), "Center");
+		edit = new Map("New Map", 100, 100);
+		mapScroll = new JScrollPane(edit);
+		mapScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		mapScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		mapScroll.getVerticalScrollBar().setUnitIncrement(6);
+		mapScroll.getHorizontalScrollBar().setUnitIncrement(6);
+		add(mapScroll, BorderLayout.CENTER);
 		// edit.setBounds(0, 0, 950, 722);
 		// edit.setVisible(true);
 
@@ -62,9 +69,15 @@ public class Editor extends JApplet implements ActionListener{
 		labelPanel.setBackground(Color.black);
 		// labelPanel.setBounds(950, 0, 250, 700);
 		tiles = new TileLabel(true);
-		labelPanel.add("Tiles", tiles);
+		JScrollPane tileScroll = new JScrollPane(tiles);
+		tileScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		tileScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		labelPanel.add("Tiles", tileScroll);
 		decorations = new TileLabel(false);
-		labelPanel.add("Decorations", decorations);
+		JScrollPane decorScroll = new JScrollPane(decorations);
+		decorScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		decorScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		labelPanel.add("Decorations", decorScroll);
 		add(labelPanel, "East");
 
 		// Set up menu bar

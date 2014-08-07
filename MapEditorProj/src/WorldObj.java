@@ -24,13 +24,12 @@ public abstract class WorldObj{
 
 	abstract public BufferedImage getBufferedImage();
 	abstract public Image getImage();
-	abstract public int getRotation();
 	abstract public void draw(Graphics g);
 	
 	
 	public void setXYLoc(int x, int y){
-		xLoc = x;
-		yLoc = y;
+		this.xLoc = x;
+		this.yLoc = y;
 	}
 
 	public void setCode(int code) {

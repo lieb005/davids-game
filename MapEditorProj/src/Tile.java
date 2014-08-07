@@ -6,10 +6,11 @@ import java.awt.image.BufferedImage;
 
 public class Tile extends WorldObj {
 	int rotation = 0;
-	boolean isCorner = false;
-	public Tile(int code, int rotation) {
+	int corners = 0;
+	public Tile(int code, int rotation, int corners) {
 		super(code);
-		this.rotation = rotation;
+		this.rotation = getRotationValue(rotation);
+		this.corners = corners;
 	}
 
 	@Override
@@ -22,13 +23,12 @@ public class Tile extends WorldObj {
 		return img;
 	}
 	
-	@SuppressWarnings("static-access")
 	public void draw(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
 		AffineTransform identity = new AffineTransform();
 		AffineTransform transform = new AffineTransform();
 		transform.setTransform(identity);
-		transform = transform.getRotateInstance((double)Math.toRadians(getRotation()),
+		transform = AffineTransform.getRotateInstance((double)Math.toRadians(getRotationValue(getRotation())),
 				xLoc * WorldObj.TILE_SIZE * Map.scaleFactor + WorldObj.TILE_SIZE * Map.scaleFactor / 2,
 				yLoc * WorldObj.TILE_SIZE * Map.scaleFactor + WorldObj.TILE_SIZE * Map.scaleFactor / 2);
 		identity = g2d.getTransform();
@@ -51,19 +51,51 @@ public class Tile extends WorldObj {
 		for(int i = 0; i < img.getWidth(); i++)
 	        for(int j = 0; j < img.getHeight(); j++)
 	            rotated.setRGB(img.getHeight()-1-j, img.getWidth()-1-i, img.getRGB(i, j));
-		isCorner = true;
 		return rotated;
 	}
 
 	public int getRotation() {
-		return rotation;
+		if(rotation == WorldObj.ROTATION0){
+			return 0;
+		}else if(rotation == WorldObj.ROTATION1){
+			return 1;
+		}else if(rotation == WorldObj.ROTATION2){
+			return 2;
+		}else{
+			return 3;
+		}
+	}
+	
+	public int getRotationValue(int index){
+		if(index == 0){
+			return WorldObj.ROTATION0;
+		}else if(index == 1){
+			return WorldObj.ROTATION1;
+		}else if(index == 2){
+			return WorldObj.ROTATION2;
+		}else{
+			return WorldObj.ROTATION3;
+		}
+	}
+	
+	public void addCorner(){//measured 0, 1, 2, 3. O is default tile
+		if(corners < 3){
+			corners++;
+		}else{
+			corners = 0;
+		}
+		System.out.println(xLoc + ", " + yLoc +" has corners: " + corners);
 	}
 
 	public void setRotation(int rotation) {
 		this.rotation = rotation;
 	}
 	
+	public int getCorners(){
+		return corners;
+	}
+	
 	public String toString() {
-		return getCode() + " " + getRotation();
+		return getCode() + " " + getRotation() + " " + getCorners();
 	}
 }

@@ -20,10 +20,6 @@ public class Decoration extends WorldObj{
 		return ImageHandler.getBufferedTile(getCode(), false).getImage();
 	}
 	@Override
-	public int getRotation() {
-		return 0;
-	}
-	@Override
 	public void draw(Graphics g) {
 		// TODO Auto-generated method stub
 		BufferedImage img = getBufferedImage();

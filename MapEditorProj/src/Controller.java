@@ -33,7 +33,6 @@ public class Controller {// responsible for common used methods for interacting
 
 	public static void open(String name) {
 		BufferedReader read = null;
-		String suffix ="";
 		Map map;
 		if(name.endsWith(".txt")){
 			map = new Map(name.substring(0, name.length() - 4), 0, 0);
@@ -44,15 +43,19 @@ public class Controller {// responsible for common used methods for interacting
 			read = new BufferedReader(new FileReader(new File("./Maps/" + name)));
 			int y = 0;
 			while (read.ready()) {
+				int x = 0;
 				map.grid.add(new ArrayList<WorldObj[]>());
 				for (String grid : read.readLine().split("   [ ]*")) {
 					String[] ids = grid.split(" ");
 					Tile tile = new Tile(Integer.parseInt(ids[0]),
-							Integer.parseInt(ids[1]));
-					Decoration decor = new Decoration(Integer.parseInt(ids[2]));
+							Integer.parseInt(ids[1]), Integer.parseInt(ids[2]));
+					tile.setXYLoc(y, x);
+					Decoration decor = new Decoration(Integer.parseInt(ids[3]));
+					decor.setXYLoc(y, x);
 					WorldObj obj[] = new WorldObj[] { tile, decor };
 					
 					map.grid.get(y).add(obj);
+					x++;
 				}
 				y++;
 			}

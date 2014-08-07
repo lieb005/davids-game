@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
@@ -20,13 +21,12 @@ public class TileLabel extends JPanel {
 	public static ArrayList<JButton> tiles;
 	public static ArrayList<JButton> decor;
 	public static boolean onTile = true;
-	public static int selectedObjectIndex = 0;
+	public static int selectedObjectIndex = -1;
 
 	public TileLabel(boolean t) {// if true tile panel, if false, decorations
 		this.setLayout(null);
 		this.setBackground(Color.white);
 		this.setForeground(Color.white);
-		this.setPreferredSize(new Dimension(226, 660));
 
 		if (t) {
 			tiles = new ArrayList<JButton>();
@@ -35,7 +35,9 @@ public class TileLabel extends JPanel {
 			try {
 				getTiles();
 			} catch (Exception e) {
-				System.out.println("Some tiles failed to load!");
+				JOptionPane.showMessageDialog(null, "Some Tiles failed to load! Program may not run "
+						+ "as intended", "Error",
+						JOptionPane.WARNING_MESSAGE);
 			}
 		} else {
 			decor = new ArrayList<JButton>();
@@ -44,7 +46,9 @@ public class TileLabel extends JPanel {
 			try {
 				getDecor();
 			} catch (Exception e) {
-				System.out.println("Some Decorations failed to load!");
+				JOptionPane.showMessageDialog(null, "Some Decorations failed to load! Program may not"
+						+ " run as intended", "Error",
+						JOptionPane.WARNING_MESSAGE);
 			}
 		}
 		lab.setFont(new Font("Times", Font.PLAIN, 35));
@@ -82,7 +86,8 @@ public class TileLabel extends JPanel {
 			tiles.add(tile);
 			this.add(tiles.get(i));
 		}
-		selectedObjectIndex = 0;
+		this.setPreferredSize(new Dimension(216, lastY));
+		selectedObjectIndex = -1;
 	}
 
 	public void getDecor() {
@@ -102,7 +107,7 @@ public class TileLabel extends JPanel {
 
 			int w = decorImages.get(i).getBufferedImage().getWidth();
 			int h = decorImages.get(i).getBufferedImage().getHeight();
-			if (h > maxHeight) {
+			if (h > maxHeight && startX + 10 + prevW + w <= 216) {
 				maxHeight = h;
 			}
 			if (startX + 10 + prevW + w <= 216) {
@@ -115,7 +120,7 @@ public class TileLabel extends JPanel {
 			} else {
 				startX = 10;
 				startY += (10 + maxHeight);
-				maxHeight = 0;
+				maxHeight = h;
 			}
 			decoration.setBounds(startX, startY, w, h);
 			decoration.setToolTipText(decorImages.get(i).getName());
@@ -124,6 +129,7 @@ public class TileLabel extends JPanel {
 			decor.add(decoration);
 			this.add(decor.get(i));
 		}
+		this.setPreferredSize(new Dimension(216, startY + maxHeight + 10));
 	}
 
 	public static void blankBorders() {
