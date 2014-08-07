@@ -51,7 +51,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener,
 			try {
 				updateDisplay.sleep(200);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
