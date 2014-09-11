@@ -17,6 +17,10 @@ public class BufferedTile{
 	public BufferedTile(File imageFile){
 		if(imageFile.getName().toLowerCase().endsWith(".gif")){
 			image = Toolkit.getDefaultToolkit().createImage(imageFile.getAbsolutePath());
+			if(image.getWidth(null) > 216){
+				image = image.getScaledInstance(216, image.getHeight(null) * 216 / image.getWidth(null),
+						Image.SCALE_SMOOTH);
+			}
 			icon = new ImageIcon(image);
 		}
 		try {

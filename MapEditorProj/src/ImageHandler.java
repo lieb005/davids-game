@@ -36,15 +36,16 @@ public class ImageHandler {
 		} else {
 			directory = new File("./World/Decorations/");
 		}
-		//System.out.println(directory.listFiles().length);
+		// System.out.println(directory.listFiles().length);
 		System.out.println(directory.getAbsolutePath());
 		if (directory.isDirectory()) {
 			BufferedTile img = null;
 			for (File imageFile : directory.listFiles(filter)) {
 				try {
 					img = new BufferedTile(imageFile);
-					img.setBufferedImage(copyImageNamed(img.getBufferedImage(), img.getName(), img.getIndex()));
-					//System.out.println(new Integer(name[0]));
+					img.setBufferedImage(copyImageNamed(img.getBufferedImage(),
+							img.getName(), img.getIndex()));
+					// System.out.println(new Integer(name[0]));
 					if (decor == false) {
 						img.setType(true);
 						tileImageList.put(img.getIndex(), img);
@@ -65,7 +66,7 @@ public class ImageHandler {
 			System.err.println("Files not found.");
 		}
 
-		//System.out.println(failedCount + " images failed to load.");
+		// System.out.println(failedCount + " images failed to load.");
 		return failedCount;
 	}
 
@@ -97,11 +98,11 @@ public class ImageHandler {
 		WritableRaster raster = source.copyData(null);
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
 	}
-	
-	public static BufferedTile getBufferedTile(int code, boolean tile){
-		if(tile){
+
+	public static BufferedTile getBufferedTile(int code, boolean tile) {
+		if (tile) {
 			return tileImageList.get(code);
-		}else{
+		} else {
 			return decorImageList.get(code);
 		}
 	}
@@ -113,5 +114,4 @@ public class ImageHandler {
 	public static Hashtable<Integer, BufferedTile> getDecor() {
 		return decorImageList;
 	}
-
 }

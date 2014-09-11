@@ -32,6 +32,9 @@ public class Editor extends JApplet implements ActionListener{
 	JMenuItem editMode;
 	static Editor e;
 	
+	static TileLabel decorations;
+	static TileLabel tiles;
+	
 	static JScrollPane mapScroll;
 
 	public static void main(String[] args) {
@@ -47,23 +50,17 @@ public class Editor extends JApplet implements ActionListener{
 	}
 
 	public void init() { // set up GUI
-		TileLabel decorations;
-		TileLabel tiles;
 
 		// this loads decor and tiles
 		ImageHandler.loadImages(true);
 
 		setLayout(new BorderLayout());
 		
-		edit = new Map("New Map", 100, 100);
+		edit = new Map("New Map", 50, 50);
 		mapScroll = new JScrollPane(edit);
 		mapScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		mapScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		mapScroll.getVerticalScrollBar().setUnitIncrement(6);
-		mapScroll.getHorizontalScrollBar().setUnitIncrement(6);
 		add(mapScroll, BorderLayout.CENTER);
-		// edit.setBounds(0, 0, 950, 722);
-		// edit.setVisible(true);
 
 		JTabbedPane labelPanel = new JTabbedPane();
 		labelPanel.setBackground(Color.black);
@@ -98,8 +95,12 @@ public class Editor extends JApplet implements ActionListener{
 		open.addActionListener(this);
 		JMenuItem save = new JMenuItem("Save Map");
 		save.addActionListener(this);
-		JMenuItem del = new JMenuItem("Delete this map");
+		JMenuItem rename = new JMenuItem("Rename Map");
+		rename.addActionListener(this);
+		JMenuItem del = new JMenuItem("Delete This Map");
 		del.addActionListener(this);
+		JMenuItem importTiles = new JMenuItem("Import Image");
+		importTiles.addActionListener(this);
 
 		// edit
 		JMenuItem undo = new JMenuItem("Undo");
@@ -116,7 +117,7 @@ public class Editor extends JApplet implements ActionListener{
 		//properties
 		JMenuItem resize = new JMenuItem("Map Data");
 		resize.addActionListener(this);
-		editMode = new JMenuItem("Editing Mode");
+		editMode = new JMenuItem("Game Mode");
 		editMode.addActionListener(this);
 		JMenuItem toggleGrid = new JMenuItem("Show/Hide Grid");
 		toggleGrid.addActionListener(this);
@@ -135,7 +136,9 @@ public class Editor extends JApplet implements ActionListener{
 		fileMenu.add(newMap);
 		fileMenu.add(open);
 		fileMenu.add(save);
+		fileMenu.add(rename);
 		fileMenu.add(del);
+		fileMenu.add(importTiles);
 
 		editMenu.add(undo);
 		editMenu.add(redo);
@@ -171,29 +174,37 @@ public class Editor extends JApplet implements ActionListener{
 		edit.grid.resize(m.getGridWidth(), m.getGridHeight());
 		edit.grid = m.grid;
 		edit.setName(m.getName());
-		edit.setScale(2);
+		edit.setScale(1);
 		e.repaint();
+	}
+	
+	public static void refreshImages(){
+		ImageHandler.loadImages(true);
+		tiles.getTiles();
+		decorations.getDecor();
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		String buttonLabel = ((AbstractButton) e.getSource()).getText();
 		if (buttonLabel == "New Map") {
+			editMode.setText("Game Mode");
 			propertiesDialog(true);
 		}
-		if(buttonLabel == "Open Map"){
+		else if(buttonLabel == "Open Map"){
 			JFileChooser choose = new JFileChooser("./Maps/");
 			FileNameExtensionFilter filter = new FileNameExtensionFilter(".txt Files", "txt");
 			choose.setFileFilter(filter);
 			choose.setFileHidingEnabled(true);
 			int returnVal = choose.showOpenDialog(this);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				Controller.open(choose.getSelectedFile().getName());
+				Controller.open(choose.getSelectedFile().getAbsolutePath());
+				editMode.setText("Game Mode");
 			}
 		}
-		if (buttonLabel == "Save Map") {
+		else if (buttonLabel == "Save Map") {
 			Controller.save(edit);
 		}
-		if(e.getSource() == editMode){
+		else if(e.getSource() == editMode){
 			if(buttonLabel.equals("Editing Mode")){
 				edit.setScale(1);
 				editMode.setText("Game Mode");
@@ -202,13 +213,69 @@ public class Editor extends JApplet implements ActionListener{
 				editMode.setText("Editing Mode");
 			}
 		}
-		if(buttonLabel == "Show/Hide Grid"){
+		else if(buttonLabel == "Show/Hide Grid"){
 			edit.setGridVisability(!edit.showGrid);
 		}
-		if(buttonLabel == "Map Data"){
+		else if(buttonLabel == "Map Data"){
 			propertiesDialog(false);
 		}
-
+		else if(buttonLabel == "Rename Map"){
+			JPanel name = new JPanel();
+			JPanel buttons = new JPanel();
+			JButton ok = new JButton("Ok");
+			JButton cancel = new JButton("Cancel");
+			buttons.add(ok);
+			buttons.add(cancel);
+			final JTextField nameField = new JTextField(15);
+			name.add(nameField);
+			final JOptionPane rename = new JOptionPane(null,
+					JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
+					new JPanel[] {buttons, name});
+			final JDialog d = rename.createDialog("Rename this map");
+			ok.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e){
+					boolean canWrite = false;
+					if(nameField.getText().length() != 0){
+						canWrite = true;
+					}else{
+						JOptionPane.showMessageDialog(null, "Enter a name for your map",
+								"Couldn't rename", JOptionPane.ERROR_MESSAGE);
+					}
+					if(canWrite){
+						d.setVisible(false);
+						d.dispose();
+						Controller.rename(nameField.getText());
+						edit.setName(nameField.getText());
+					}
+				}
+			});
+			cancel.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e){
+					d.setVisible(false);
+					d.dispose();
+				}
+			});
+			d.setVisible(true);
+		}
+		else if(buttonLabel == "Delete This Map"){
+			int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this map?",
+					"Delete?", JOptionPane.YES_NO_OPTION);
+			if(choice == 0){
+				Controller.deleteMap(edit.getName());
+			}
+		}
+		else if(buttonLabel == "Import Image"){
+			Controller.importTile();
+		}
+		else if(buttonLabel == "Show/Hide Collision Boxes"){
+			Map.setColisionVisibility();
+		}else if(buttonLabel == "Undo"){
+			edit.undo();
+		}else if(buttonLabel == "Redo"){
+			edit.redo();
+		}
 	}
 
 	private void propertiesDialog(boolean newMap) {
@@ -220,8 +287,8 @@ public class Editor extends JApplet implements ActionListener{
 		final JTextField heightTextField;
 
 		if (newMapBool) {
-			widthTextField = new JTextField("20", 5);
-			heightTextField = new JTextField("20", 5);
+			widthTextField = new JTextField("50", 5);
+			heightTextField = new JTextField("50", 5);
 		} else {
 			widthTextField = new JTextField(
 					String.valueOf(edit.getGridWidth()), 5);
@@ -255,7 +322,7 @@ public class Editor extends JApplet implements ActionListener{
 
 		final JDialog d;
 		if (newMapBool) {
-			nameField.setText("New Map");
+			nameField.setText("Map Name");
 			d = options.createDialog("New Map");
 		} else {
 			nameField.setText(edit.getName());
@@ -277,6 +344,23 @@ public class Editor extends JApplet implements ActionListener{
 					JOptionPane.showMessageDialog(null,
 							"Only numbers can be used for a map dimension");
 				}
+				
+				if(w * h > 90000){
+					canWrite = false;
+					JOptionPane.showMessageDialog(null,
+							"Your map is too big: " + (w * h) + " tiles. Max: 90000 tiles");
+				}
+				
+				if(Controller.checkFileExistance(nameField.getText() + ".txt") && newMapBool){
+					canWrite = false;
+					int choice=JOptionPane.showConfirmDialog(null, "A map with this name already exists."
+							+ " Would you like to overwrite it?", "Map already exists", 
+							JOptionPane.YES_NO_OPTION);
+					if(choice == 0){
+						canWrite = true;
+					}
+				}
+				
 				if (canWrite) {
 					if (newMapBool || edit == null){
 						setMap(new Map(nameField.getText(), w, h));

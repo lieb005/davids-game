@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,11 @@ import javax.swing.border.LineBorder;
 public class TileLabel extends JPanel {
 	int lastX = 0;
 	int lastY = 70;
+	
+	int startX = 0;
+	int startY = 70;
+	int maxHeight = 0;
+	
 	JLabel lab;
 	public static ArrayList<JButton> tiles;
 	public static ArrayList<JButton> decor;
@@ -56,9 +62,9 @@ public class TileLabel extends JPanel {
 		this.add(lab);
 	}
 
-	public void getTiles() {
+	public void getTiles(){
 		Hashtable<Integer, BufferedTile> tileImages = ImageHandler.getTiles();
-		for (int i = 0; i < Controller.getNumObjs(true) - 1; i++) {
+		for (int i = tiles.size(); i < Controller.getNumObjs(true); i++) {
 			JButton tile;
 			if (tileImages.get(i).getIcon() == null) {
 				tile = new JButton(new ImageIcon(Toolkit.getDefaultToolkit()
@@ -68,12 +74,12 @@ public class TileLabel extends JPanel {
 			} else {
 				tile = new JButton(tileImages.get(i).getIcon());
 			}
+			
 			if (lastX + 10 + WorldObj.TILE_SIZE <= 216) {
 				if (i > 0) {
 					lastX += 10 + WorldObj.TILE_SIZE;
 				} else {
 					lastX += 10;
-
 				}
 			} else {
 				lastX = 10;
@@ -81,32 +87,34 @@ public class TileLabel extends JPanel {
 			}
 			tile.setBounds(lastX, lastY, WorldObj.TILE_SIZE, WorldObj.TILE_SIZE);
 			tile.setToolTipText(tileImages.get(i).getName());
-			selectedObjectIndex = i;
 			tile = addActionListener(i, tile, true);
 			tiles.add(tile);
 			this.add(tiles.get(i));
 		}
 		this.setPreferredSize(new Dimension(216, lastY));
-		selectedObjectIndex = -1;
 	}
 
 	public void getDecor() {
-		int startX = 0;
-		int startY = 70;
-		int maxHeight = 0;
 		int prevW = 0;
 		Hashtable<Integer, BufferedTile> decorImages = ImageHandler.getDecor();
-		for (int i = 0; i < Controller.getNumObjs(false) -1; i++) {
+		for (int i = decor.size(); i < Controller.getNumObjs(false); i++) {
 			JButton decoration;
+			int w = decorImages.get(i).getBufferedImage().getWidth();
+			int h = decorImages.get(i).getBufferedImage().getHeight();
 			if(decorImages.get(i).getIcon() == null){
-			decoration = new JButton(new ImageIcon(Toolkit.getDefaultToolkit().createImage(
-					decorImages.get(i).getBufferedImage().getSource())));
+				Image img = Toolkit.getDefaultToolkit().createImage(
+						decorImages.get(i).getBufferedImage().getSource());
+				if(img.getWidth(null) > 216){
+					img = img.getScaledInstance(216, img.getHeight(null) * 216 / img.getWidth(null),
+							Image.SCALE_SMOOTH);
+					w = img.getWidth(null);
+					h = img.getHeight(null);
+				}
+			decoration = new JButton(new ImageIcon(img));
 			}else{
 				decoration = new JButton(decorImages.get(i).getIcon());
 			}
-
-			int w = decorImages.get(i).getBufferedImage().getWidth();
-			int h = decorImages.get(i).getBufferedImage().getHeight();
+			
 			if (h > maxHeight && startX + 10 + prevW + w <= 216) {
 				maxHeight = h;
 			}
